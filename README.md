@@ -13,26 +13,34 @@ https://www.youtube.com/watch?v=HLxV4mcgkUA
 - **Customizable Settings**: Offers settings to enable/disable notifications and logging, and to choose the directory for the log file.
 # Walkthrough
 
-1. **Installation and Activation**:
-    - Download the Note Watch Plugin and place it in your Obsidian plugins directory.
-    - Open Obsidian and navigate to `Settings` > `Community plugins`.
-    - Click on `Manage`, find the Note Watch Plugin in the list, and enable it.
+## Installation and Activation
+### BRAT
+![image](https://github.com/user-attachments/assets/100b8f6e-5d45-4be7-abf2-b80ec1cae4bb)
 
-2. **Configuring the Plugin**:
-    
-    - After enabling the plugin, click on `Settings` > `Note Watch Plugin Settings`.
-    - You will see several options:
-        - **Notify on File Create**: Enable notifications when a new file is created.
-        - **Notify on File Delete**: Enable notifications when a file is deleted.
-        - **Notify on File Move**: Enable notifications when a file is moved.
-        - **Log Events**: Enable logging of events to a markdown file.
-        - **Log Directory**: Select the directory for the log file in Obsidian by clicking the `Select Directory` button. Choose your preferred folder from the modal that appears.
-    - Adjust these settings according to your preferences.
+- Install BRAT from the Community Plugins in Obsidian
+- Open the command palette and run the command `BRAT: Plugins: Add a beta plugin for testing` (If you want the plugin version to be frozen, use the command `BRAT: Plugins Add a beta plugin with frozen version based on a release tag`.)
+- Using the link `https://github.com/MokeyII/obsidian-Note-Watch` paste it into the modal that shows.
+- Click on Add Plugin -- wait a few seconds and BRAT will tell you what is going on
+- After BRAT confirms the installation, in Settings go to the Community plugins tab.
+- Refresh the list of plugins
+- Find the beta plugin you just installed and Enable it.
+
+## Configuring the Plugin
+![image](https://github.com/user-attachments/assets/bea89b22-c124-4658-a550-ecea6b619306)
+
+- After enabling the plugin, click on `Settings` > `Note Watch Plugin Settings`.
+- You will see several options:
+    - **Notify on File Create**: Enable notifications when a new file is created.
+    - **Notify on File Delete**: Enable notifications when a file is deleted.
+    - **Notify on File Move**: Enable notifications when a file is moved.
+    - **Log Events**: **(DISABLED BY DEFAULT)** Enable logging of events to a markdown file.
+    - **Log Directory**: Select the directory for the log file in Obsidian by clicking the `Select Directory` button. Choose your preferred folder from the modal that appears. 
+- Adjust these settings according to your preferences.
         
-3. **Using the Plugin**:
+## Using the Plugin
     
-    - Once configured, the plugin will automatically start notifying you of file activities based on your settings.
-    - Notifications will appear for the specified events, and if logging is enabled, entries will be added to the `note-watch.md` file in your chosen directory.
-    - The log file will include the date and time of each event, with links to the newly created or moved files.
+- Once configured, the plugin will automatically start notifying you of file activities based on your settings.
+- Notifications will appear for the specified events, and if logging is enabled, entries will be added to the `note-watch.md` file in your chosen directory.
+- The log file (if enabled) will include the date and time of each event, with links to the newly created or moved files.
         
 
