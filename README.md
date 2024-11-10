@@ -1,3 +1,5 @@
+![Static Badge](https://img.shields.io/badge/LICENSE%20-%20GNU%20General%20Public%20License%20v3.0%20-%20blue) ![Static Badge](https://img.shields.io/badge/Pull%20Requests%20-%20Welcome%20-%20green) ![Static Badge](https://img.shields.io/badge/Application%20-%20Obsidian%20Notes%20-%20purple) ![Static Badge](https://img.shields.io/badge/Language%20-%20JS%20-%20yellow)
+
 Introducing the Note Watch Plugin: an intuitive tool designed to keep you informed of all file activities within your Obsidian vault. Whether files are created, deleted, or moved, the plugin instantly notifies you and logs the events for easy tracking. Stay on top of your notes and their movements without the need for constant manual checks.
 
 ![Obsidian Note Watch](https://github.com/user-attachments/assets/ed85555a-ba9a-4487-a9aa-958711cb24e3)
