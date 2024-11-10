@@ -1,6 +1,6 @@
 Introducing the Note Watch Plugin: an intuitive tool designed to keep you informed of all file activities within your Obsidian vault. Whether files are created, deleted, or moved, the plugin instantly notifies you and logs the events for easy tracking. Stay on top of your notes and their movements without the need for constant manual checks.
 
-[![Watch the video](https://www.youtube.com/watch?v=HLxV4mcgkUA])
+![Watch the video](https://www.youtube.com/watch?v=HLxV4mcgkUA])
 
 # What This Plugin Does
 
