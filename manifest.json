@@ -1,0 +1,10 @@
+{
+    "id": "note-watch",
+    "name": "Note Watch",
+    "version": "1.0.0",
+    "minAppVersion": "1.0.0",
+    "author": "TheTechMokey",
+    "authorUrl": "https://github.com/MokeyII",
+    "description": "Notifies and logs when a file is created, moved or deleted",
+    "isDesktopOnly": false
+}
