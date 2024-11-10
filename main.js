@@ -1,4 +1,5 @@
-const { Plugin, Notice, PluginSettingTab, Setting, TFile, FuzzySuggestModal, TFolder } = require('obsidian');
+const { Plugin, Notice, PluginSettingTab, Setting, TFile, FuzzySuggestModal, TFolder, normalizePath } = require('obsidian');
+
 
 module.exports = class NoteWatchPlugin extends Plugin {
     async onload() {
@@ -75,7 +76,7 @@ module.exports = class NoteWatchPlugin extends Plugin {
         // Log event message to the specified log file with error handling
         async logEvent(message) {
             try {
-                const logFilePath = `${this.settings.logDir}/note-watch.md`;
+                const logFilePath = normalizePath(`${this.settings.logDir}/note-watch.md`);
                 const logFile = this.app.vault.getAbstractFileByPath(logFilePath);
                 if (logFile && logFile instanceof TFile) {
                     const content = await this.app.vault.read(logFile);
@@ -88,8 +89,9 @@ module.exports = class NoteWatchPlugin extends Plugin {
                 new Notice('Failed to log event. Check console for details.');
             }
         }
+
     
-            // Load settings from storage
+    // Load settings from storage
     async loadSettings() {
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
     }
@@ -202,8 +204,10 @@ class LogDirModal extends FuzzySuggestModal {
     }
 
     onChooseItem(item) {
-        this.plugin.settings.logDir = item.path;
+        const normalizedPath = normalizePath(item.path);
+        this.plugin.settings.logDir = normalizedPath;
         this.plugin.saveSettings();
-        new Notice(`Log directory set to: ${item.path}`);
+        new Notice(`Log directory set to: ${normalizedPath}`);
     }
+    
 }
