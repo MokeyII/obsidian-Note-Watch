@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "minAppVersion": "1.0.0",
     "description": "A plugin to notify and log file activities in Obsidian.",
-    "author": "YTheTechMokey",
+    "author": "TheTechMokey",
     "authorUrl": "https://github.com/MokeyII",
     "isDesktopOnly": false
   }
