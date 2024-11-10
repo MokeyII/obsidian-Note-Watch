@@ -86,54 +86,55 @@ module.exports = class NoteWatchPlugin extends Plugin {
         if (this.settings.logEvents) await this.logEvent(message);
     }
 
-    // Log event message to the specified log file with error handling
-    async logEvent(message) {
-        try {
-            const logFilePath = normalizePath(`${this.settings.logDir}/note-watch.md`);
-            let logFile = this.app.vault.getAbstractFileByPath(logFilePath);
+        // Log event message to the specified log file with error handling
+        async logEvent(message) {
+            try {
+                const logFilePath = normalizePath(`${this.settings.logDir}/note-watch.md`);
+                let logFile = this.app.vault.getAbstractFileByPath(logFilePath);
 
-            if (!logFile) {
-                try {
-                    // If the file does not exist, create it with the initial message
-                    logFile = await this.app.vault.create(logFilePath, message);
-                } catch (error) {
-                    if (error.message === 'File already exists.') {
-                        // Handle the case where the file already exists
-                        console.log('Log file already exists, proceeding with logging.');
-                    } else {
-                        console.error('Failed to create log file:', error);
-                        new Notice('Failed to create log file. Check console for details.');
+                if (!logFile) {
+                    try {
+                        // If the file does not exist, create it with the initial message
+                        logFile = await this.app.vault.create(logFilePath, `${message}\n`);
+                    } catch (error) {
+                        if (error.message === 'File already exists.') {
+                            // Handle the case where the file already exists
+                            console.log('Log file already exists, proceeding with logging.');
+                        } else {
+                            console.error('Failed to create log file:', error);
+                            new Notice('Failed to create log file. Check console for details.');
+                        }
+                    }
+                } else if (logFile instanceof TFile) {
+                    try {
+                        // If the file exists, prepend the message with a newline
+                        await this.app.vault.process(logFile, content => {
+                            const lines = content.split('\n');
+                            let yamlEndIndex = 0;
+                            if (lines[0] === '---') {
+                                yamlEndIndex = lines.indexOf('---', 1);
+                                if (yamlEndIndex === -1) {
+                                    yamlEndIndex = 0; // No ending '---' found
+                                }
+                            }
+                            const newContent = [
+                                ...lines.slice(0, yamlEndIndex + 1),
+                                `${message}\n`,
+                                ...lines.slice(yamlEndIndex + 1)
+                            ].join('\n');
+                            return newContent;
+                        });
+                    } catch (error) {
+                        console.error('Failed to process log file:', error);
+                        new Notice('Failed to log event. Check console for details.');
                     }
                 }
-            } else if (logFile instanceof TFile) {
-                try {
-                    // If the file exists, prepend the message
-                    await this.app.vault.process(logFile, content => {
-                        const lines = content.split('\n');
-                        let yamlEndIndex = 0;
-                        if (lines[0] === '---') {
-                            yamlEndIndex = lines.indexOf('---', 1);
-                            if (yamlEndIndex === -1) {
-                                yamlEndIndex = 0; // No ending '---' found
-                            }
-                        }
-                        const newContent = [
-                            ...lines.slice(0, yamlEndIndex + 1),
-                            message,
-                            ...lines.slice(yamlEndIndex + 1)
-                        ].join('\n');
-                        return newContent;
-                    });
-                } catch (error) {
-                    console.error('Failed to process log file:', error);
-                    new Notice('Failed to log event. Check console for details.');
-                }
+            } catch (error) {
+                console.error('Failed to log event:', error);
+                new Notice('Failed to log event. Check console for details.');
             }
-        } catch (error) {
-            console.error('Failed to log event:', error);
-            new Notice('Failed to log event. Check console for details.');
         }
-    }
+
 
     // Load settings from storage
     async loadSettings() {
