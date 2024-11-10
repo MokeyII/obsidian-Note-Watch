@@ -15,7 +15,8 @@ https://www.youtube.com/watch?v=HLxV4mcgkUA
 # Walkthrough
 
 ## Installation and Activation
-### BRAT
+### Install using [BRAT](https://tfthacker.com/brat-quick-guide) Beta Testing Plugin
+##### Note watch is currently in beta and will need to be installed using BRAT (recommended) or manually installed 
 ![image](https://github.com/user-attachments/assets/100b8f6e-5d45-4be7-abf2-b80ec1cae4bb)
 
 - Install BRAT from the Community Plugins in Obsidian
