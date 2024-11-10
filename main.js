@@ -1,6 +1,5 @@
 const { Plugin, Notice, PluginSettingTab, Setting, TFile, FuzzySuggestModal, TFolder, normalizePath } = require('obsidian');
 
-
 module.exports = class NoteWatchPlugin extends Plugin {
     async onload() {
         console.log('Loading Note Watch Plugin');
@@ -13,8 +12,10 @@ module.exports = class NoteWatchPlugin extends Plugin {
         this.onFileDelete = this.onFileDelete.bind(this);
         this.onFileRename = this.onFileRename.bind(this);
 
-        // Register event listeners based on settings
-        this.registerEvents();
+        // Register event listeners once the workspace is ready
+        this.app.workspace.onLayoutReady(() => {
+            this.registerEvents();
+        });
 
         // Add settings tab
         this.addSettingTab(new NoteWatchSettingTab(this.app, this));
@@ -39,100 +40,100 @@ module.exports = class NoteWatchPlugin extends Plugin {
         }
     }
 
-        // Unregister all event listeners
-        unregisterEvents() {
-            this.app.vault.off('create', this.onFileCreate);
-            this.app.vault.off('delete', this.onFileDelete);
-            this.app.vault.off('rename', this.onFileRename);
-        }
-    
-        // Handle file creation event
-        async onFileCreate(file) {
-            if (file.path === normalizePath(`${this.settings.logDir}/note-watch.md`)) {
-                return;
-            }
+    // Unregister all event listeners
+    unregisterEvents() {
+        this.app.vault.off('create', this.onFileCreate);
+        this.app.vault.off('delete', this.onFileDelete);
+        this.app.vault.off('rename', this.onFileRename);
+    }
 
-            const timestamp = new Date().toLocaleString();
-            const message = `${timestamp} - New file added: ${file.path.endsWith('Untitled.md') ? 'Untitled.md' : `[[${file.path}]]`}`;
-            console.log(message);
-            new Notice(`New file added: ${file.path}`);
-            if (this.settings.logEvents) await this.logEvent(message);
-        }
-        // Handle file deletion event
-        async onFileDelete(file) {
-            if (file.path === normalizePath(`${this.settings.logDir}/note-watch.md`)) {
-                return;
-            }
-
-            const timestamp = new Date().toLocaleString();
-            const message = `${timestamp} - File deleted: ${file.path}`;
-            console.log(message);
-            new Notice(message);
-            if (this.settings.logEvents) await this.logEvent(message);
-        }
-    
-        // Handle file rename (move) event
-        async onFileRename(file, oldPath) {
-            if (file.path === normalizePath(`${this.settings.logDir}/note-watch.md`) || oldPath === normalizePath(`${this.settings.logDir}/note-watch.md`)) {
-                return;
-            }
-
-            const timestamp = new Date().toLocaleString();
-            const message = `${timestamp} - File moved from: ${oldPath} to: ${file.path.endsWith('Untitled.md') ? 'Untitled.md' : `[[${file.path}]]`}`;
-            console.log(message);
-            new Notice(`File moved from: ${oldPath} to: ${file.path}`);
-            if (this.settings.logEvents) await this.logEvent(message);
+    // Handle file creation event
+    async onFileCreate(file) {
+        if (file.path === normalizePath(`${this.settings.logDir}/note-watch.md`)) {
+            return;
         }
 
-        // Log event message to the specified log file with error handling
-        async logEvent(message) {
-            try {
-                const logFilePath = normalizePath(`${this.settings.logDir}/note-watch.md`);
-                let logFile = this.app.vault.getAbstractFileByPath(logFilePath);
+        const timestamp = new Date().toLocaleString();
+        const message = `${timestamp} - New file added: ${file.path.endsWith('Untitled.md') ? 'Untitled.md' : `[[${file.path}]]`}`;
+        console.log(message);
+        new Notice(`New file added: ${file.path}`);
+        if (this.settings.logEvents) await this.logEvent(message);
+    }
 
-                if (!logFile) {
-                    try {
-                        // If the file does not exist, create it with the initial message
-                        logFile = await this.app.vault.create(logFilePath, message);
-                    } catch (error) {
-                        if (error.message === 'File already exists.') {
-                            // Handle the case where the file already exists
-                            console.log('Log file already exists, proceeding with logging.');
-                        } else {
-                            console.error('Failed to create log file:', error);
-                            new Notice('Failed to create log file. Check console for details.');
-                        }
-                    }
-                } else if (logFile instanceof TFile) {
-                    try {
-                        // If the file exists, prepend the message
-                        await this.app.vault.process(logFile, content => {
-                            const lines = content.split('\n');
-                            let yamlEndIndex = 0;
-                            if (lines[0] === '---') {
-                                yamlEndIndex = lines.indexOf('---', 1);
-                                if (yamlEndIndex === -1) {
-                                    yamlEndIndex = 0; // No ending '---' found
-                                }
-                            }
-                            const newContent = [
-                                ...lines.slice(0, yamlEndIndex + 1),
-                                message,
-                                ...lines.slice(yamlEndIndex + 1)
-                            ].join('\n');
-                            return newContent;
-                        });
-                    } catch (error) {
-                        console.error('Failed to process log file:', error);
-                        new Notice('Failed to log event. Check console for details.');
+    // Handle file deletion event
+    async onFileDelete(file) {
+        if (file.path === normalizePath(`${this.settings.logDir}/note-watch.md`)) {
+            return;
+        }
+
+        const timestamp = new Date().toLocaleString();
+        const message = `${timestamp} - File deleted: ${file.path}`;
+        console.log(message);
+        new Notice(message);
+        if (this.settings.logEvents) await this.logEvent(message);
+    }
+
+    // Handle file rename (move) event
+    async onFileRename(file, oldPath) {
+        if (file.path === normalizePath(`${this.settings.logDir}/note-watch.md`) || oldPath === normalizePath(`${this.settings.logDir}/note-watch.md`)) {
+            return;
+        }
+
+        const timestamp = new Date().toLocaleString();
+        const message = `${timestamp} - File moved from: ${oldPath} to: ${file.path.endsWith('Untitled.md') ? 'Untitled.md' : `[[${file.path}]]`}`;
+        console.log(message);
+        new Notice(`File moved from: ${oldPath} to: ${file.path}`);
+        if (this.settings.logEvents) await this.logEvent(message);
+    }
+
+    // Log event message to the specified log file with error handling
+    async logEvent(message) {
+        try {
+            const logFilePath = normalizePath(`${this.settings.logDir}/note-watch.md`);
+            let logFile = this.app.vault.getAbstractFileByPath(logFilePath);
+
+            if (!logFile) {
+                try {
+                    // If the file does not exist, create it with the initial message
+                    logFile = await this.app.vault.create(logFilePath, message);
+                } catch (error) {
+                    if (error.message === 'File already exists.') {
+                        // Handle the case where the file already exists
+                        console.log('Log file already exists, proceeding with logging.');
+                    } else {
+                        console.error('Failed to create log file:', error);
+                        new Notice('Failed to create log file. Check console for details.');
                     }
                 }
-            } catch (error) {
-                console.error('Failed to log event:', error);
-                new Notice('Failed to log event. Check console for details.');
+            } else if (logFile instanceof TFile) {
+                try {
+                    // If the file exists, prepend the message
+                    await this.app.vault.process(logFile, content => {
+                        const lines = content.split('\n');
+                        let yamlEndIndex = 0;
+                        if (lines[0] === '---') {
+                            yamlEndIndex = lines.indexOf('---', 1);
+                            if (yamlEndIndex === -1) {
+                                yamlEndIndex = 0; // No ending '---' found
+                            }
+                        }
+                        const newContent = [
+                            ...lines.slice(0, yamlEndIndex + 1),
+                            message,
+                            ...lines.slice(yamlEndIndex + 1)
+                        ].join('\n');
+                        return newContent;
+                    });
+                } catch (error) {
+                    console.error('Failed to process log file:', error);
+                    new Notice('Failed to log event. Check console for details.');
+                }
             }
+        } catch (error) {
+            console.error('Failed to log event:', error);
+            new Notice('Failed to log event. Check console for details.');
         }
-
+    }
 
     // Load settings from storage
     async loadSettings() {
@@ -252,5 +253,4 @@ class LogDirModal extends FuzzySuggestModal {
         this.plugin.saveSettings();
         new Notice(`Log directory set to: ${normalizedPath}`);
     }
-    
 }
