@@ -2,7 +2,7 @@ const { Plugin, Notice, PluginSettingTab, Setting, TFile, FuzzySuggestModal, TFo
 
 module.exports = class NoteWatchPlugin extends Plugin {
     async onload() {
-        console.log('Loading Obsidian Notifier Plugin');
+        console.log('Loading Note Watch Plugin');
 
         // Load settings
         await this.loadSettings();
@@ -16,9 +16,10 @@ module.exports = class NoteWatchPlugin extends Plugin {
         this.registerEvents();
 
         // Add settings tab
-        this.addSettingTab(new NotifierSettingTab(this.app, this));
+        this.addSettingTab(new NoteWatchSettingTab(this.app, this));
     }
 
+    // Register event listeners based on current settings
     registerEvents() {
         // Unregister all events first
         this.unregisterEvents();
@@ -37,59 +38,73 @@ module.exports = class NoteWatchPlugin extends Plugin {
         }
     }
 
-    unregisterEvents() {
-        this.app.vault.off('create', this.onFileCreate);
-        this.app.vault.off('delete', this.onFileDelete);
-        this.app.vault.off('rename', this.onFileRename);
-    }
-
-    async onFileCreate(file) {
-        const timestamp = new Date().toLocaleString();
-        const message = `${timestamp} - New file added: ${file.path.endsWith('Untitled.md') ? 'Untitled.md' : `[[${file.path}]]`}`;
-        console.log(message);
-        new Notice(`New file added: ${file.path}`);
-        if (this.settings.logEvents) await this.logEvent(message);
-    }
-
-    async onFileDelete(file) {
-        const timestamp = new Date().toLocaleString();
-        const message = `${timestamp} - File deleted: ${file.path}`;
-        console.log(message);
-        new Notice(message);
-        if (this.settings.logEvents) await this.logEvent(message);
-    }
-
-    async onFileRename(file, oldPath) {
-        const timestamp = new Date().toLocaleString();
-        const message = `${timestamp} - File moved from: ${oldPath} to: ${file.path.endsWith('Untitled.md') ? 'Untitled.md' : `[[${file.path}]]`}`;
-        console.log(message);
-        new Notice(`File moved from: ${oldPath} to: ${file.path}`);
-        if (this.settings.logEvents) await this.logEvent(message);
-    }
-
-    async logEvent(message) {
-        const logFilePath = `${this.settings.logDir}/note-watch.md`;
-        const logFile = this.app.vault.getAbstractFileByPath(logFilePath);
-        if (logFile && logFile instanceof TFile) {
-            const content = await this.app.vault.read(logFile);
-            await this.app.vault.modify(logFile, message + '\n' + content);
-        } else {
-            await this.app.vault.create(logFilePath, message);
+        // Unregister all event listeners
+        unregisterEvents() {
+            this.app.vault.off('create', this.onFileCreate);
+            this.app.vault.off('delete', this.onFileDelete);
+            this.app.vault.off('rename', this.onFileRename);
         }
-    }
-
+    
+        // Handle file creation event
+        async onFileCreate(file) {
+            const timestamp = new Date().toLocaleString();
+            const message = `${timestamp} - New file added: ${file.path.endsWith('Untitled.md') ? 'Untitled.md' : `[[${file.path}]]`}`;
+            console.log(message);
+            new Notice(`New file added: ${file.path}`);
+            if (this.settings.logEvents) await this.logEvent(message);
+        }
+    
+        // Handle file deletion event
+        async onFileDelete(file) {
+            const timestamp = new Date().toLocaleString();
+            const message = `${timestamp} - File deleted: ${file.path}`;
+            console.log(message);
+            new Notice(message);
+            if (this.settings.logEvents) await this.logEvent(message);
+        }
+    
+        // Handle file rename (move) event
+        async onFileRename(file, oldPath) {
+            const timestamp = new Date().toLocaleString();
+            const message = `${timestamp} - File moved from: ${oldPath} to: ${file.path.endsWith('Untitled.md') ? 'Untitled.md' : `[[${file.path}]]`}`;
+            console.log(message);
+            new Notice(`File moved from: ${oldPath} to: ${file.path}`);
+            if (this.settings.logEvents) await this.logEvent(message);
+        }
+    
+        // Log event message to the specified log file with error handling
+        async logEvent(message) {
+            try {
+                const logFilePath = `${this.settings.logDir}/note-watch.md`;
+                const logFile = this.app.vault.getAbstractFileByPath(logFilePath);
+                if (logFile && logFile instanceof TFile) {
+                    const content = await this.app.vault.read(logFile);
+                    await this.app.vault.modify(logFile, message + '\n' + content);
+                } else {
+                    await this.app.vault.create(logFilePath, message);
+                }
+            } catch (error) {
+                console.error('Failed to log event:', error);
+                new Notice('Failed to log event. Check console for details.');
+            }
+        }
+    
+            // Load settings from storage
     async loadSettings() {
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
     }
 
+    // Save settings to storage
     async saveSettings() {
         await this.saveData(this.settings);
         this.registerEvents(); // Re-register events after saving settings
     }
 
+    // Unregister events when the plugin is unloaded
     onunload() {
-        console.log('Unloading Obsidian Notifier Plugin');
+        console.log('Unloading Note Watch Plugin');
         this.unregisterEvents(); // Ensure all events are unregistered when the plugin is unloaded
+        new Notice('Note Watch Plugin unloaded.');
     }
 };
 
@@ -101,7 +116,8 @@ const DEFAULT_SETTINGS = {
     logDir: 'NoteWatchPlugin'
 };
 
-class NotifierSettingTab extends PluginSettingTab {
+// Settings tab for the plugin
+class NoteWatchSettingTab extends PluginSettingTab {
     constructor(app, plugin) {
         super(app, plugin);
         this.plugin = plugin;
@@ -111,8 +127,9 @@ class NotifierSettingTab extends PluginSettingTab {
         const { containerEl } = this;
         containerEl.empty();
 
-        containerEl.createEl('h2', { text: 'Notifier Plugin Settings' });
+        containerEl.createEl('h2', { text: 'Note Watch Plugin Settings' });
 
+        // Toggle for notifying on file creation
         new Setting(containerEl)
             .setName('Notify on File Create')
             .setDesc('Enable notifications when a new file is created.')
@@ -123,6 +140,7 @@ class NotifierSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
+        // Toggle for notifying on file deletion
         new Setting(containerEl)
             .setName('Notify on File Delete')
             .setDesc('Enable notifications when a file is deleted.')
@@ -133,6 +151,7 @@ class NotifierSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
+        // Toggle for notifying on file move
         new Setting(containerEl)
             .setName('Notify on File Move')
             .setDesc('Enable notifications when a file is moved.')
@@ -143,6 +162,7 @@ class NotifierSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
+        // Toggle for logging events
         new Setting(containerEl)
             .setName('Log Events')
             .setDesc('Enable logging of events to a markdown file.')
@@ -153,6 +173,7 @@ class NotifierSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
+        // Button for selecting the log directory
         new Setting(containerEl)
             .setName('Log Directory')
             .setDesc('Select the directory for the log file in Obsidian.')
@@ -165,6 +186,7 @@ class NotifierSettingTab extends PluginSettingTab {
     }
 }
 
+// Modal for selecting the log directory using a fuzzy finder
 class LogDirModal extends FuzzySuggestModal {
     constructor(app, plugin) {
         super(app);
