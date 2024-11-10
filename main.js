@@ -80,7 +80,26 @@ module.exports = class NoteWatchPlugin extends Plugin {
                 const logFile = this.app.vault.getAbstractFileByPath(logFilePath);
                 if (logFile && logFile instanceof TFile) {
                     await this.app.vault.process(logFile, content => {
-                        return message + '\n' + content;
+                        // Split the content into lines
+                        const lines = content.split('\n');
+                        
+                        // Find the end of the YAML header (assumes YAML header starts with '---' and ends with '---')
+                        let yamlEndIndex = 0;
+                        if (lines[0] === '---') {
+                            yamlEndIndex = lines.indexOf('---', 1);
+                            if (yamlEndIndex === -1) {
+                                yamlEndIndex = 0; // No ending '---' found
+                            }
+                        }
+                        
+                        // Insert the new message after the YAML header
+                        const newContent = [
+                            ...lines.slice(0, yamlEndIndex + 1),
+                            message,
+                            ...lines.slice(yamlEndIndex + 1)
+                        ].join('\n');
+                        
+                        return newContent;
                     });
                 } else {
                     await this.app.vault.create(logFilePath, message);
