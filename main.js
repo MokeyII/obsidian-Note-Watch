@@ -79,8 +79,9 @@ module.exports = class NoteWatchPlugin extends Plugin {
                 const logFilePath = normalizePath(`${this.settings.logDir}/note-watch.md`);
                 const logFile = this.app.vault.getAbstractFileByPath(logFilePath);
                 if (logFile && logFile instanceof TFile) {
-                    const content = await this.app.vault.read(logFile);
-                    await this.app.vault.modify(logFile, message + '\n' + content);
+                    await this.app.vault.process(logFile, content => {
+                        return message + '\n' + content;
+                    });
                 } else {
                     await this.app.vault.create(logFilePath, message);
                 }
@@ -90,7 +91,6 @@ module.exports = class NoteWatchPlugin extends Plugin {
             }
         }
 
-    
     // Load settings from storage
     async loadSettings() {
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
