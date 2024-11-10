@@ -11,7 +11,6 @@ module.exports = class NoteWatchPlugin extends Plugin {
         this.onFileCreate = this.onFileCreate.bind(this);
         this.onFileDelete = this.onFileDelete.bind(this);
         this.onFileRename = this.onFileRename.bind(this);
-        this.onFileModify = this.onFileModify.bind(this);
 
         // Register event listeners once the workspace is ready
         this.app.workspace.onLayoutReady(() => {
@@ -39,9 +38,6 @@ module.exports = class NoteWatchPlugin extends Plugin {
         if (this.settings.notifyOnMove) {
             this.registerEvent(this.app.vault.on('rename', this.onFileRename));
         }
-        if (this.settings.notifyOnModify) {
-            this.registerEvent(this.app.vault.on('modify', this.onFileModify));
-        }
     }
 
     // Unregister all event listeners
@@ -49,7 +45,6 @@ module.exports = class NoteWatchPlugin extends Plugin {
         this.app.vault.off('create', this.onFileCreate);
         this.app.vault.off('delete', this.onFileDelete);
         this.app.vault.off('rename', this.onFileRename);
-        this.app.vault.off('modify', this.onFileModify);
     }
 
     // Handle file creation event
@@ -77,19 +72,6 @@ module.exports = class NoteWatchPlugin extends Plugin {
         new Notice(message);
         if (this.settings.logEvents) await this.logEvent(message);
     }
-
-        // Handle file modification event
-        async onFileModify(file) {
-            if (file.path === normalizePath(`${this.settings.logDir}/note-watch.md`)) {
-                return;
-            }
-
-            const timestamp = new Date().toLocaleString();
-            const message = `${timestamp} - Contents of [[${file.path}]] were modified`;
-            console.log(message);
-            new Notice(`Contents of [[${file.path}]] were modified`);
-            if (this.settings.logEvents) await this.logEvent(message);
-        }
 
     // Handle file rename (move) event
     async onFileRename(file, oldPath) {
@@ -177,7 +159,6 @@ const DEFAULT_SETTINGS = {
     notifyOnCreate: true,
     notifyOnDelete: true,
     notifyOnMove: true,
-    notifyOnModify: true,
     logEvents: false,
     logDir: 'NoteWatchPlugin'
 };
