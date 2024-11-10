@@ -1,10 +1,11 @@
 {
-    "id": "note-watch",
+    "id": "note-watch-plugin",
     "name": "Note Watch",
     "version": "1.0.0",
     "minAppVersion": "1.0.0",
-    "author": "TheTechMokey",
+    "description": "A plugin to notify and log file activities in Obsidian.",
+    "author": "YTheTechMokey",
     "authorUrl": "https://github.com/MokeyII",
-    "description": "Notifies and logs when a file is created, moved or deleted",
     "isDesktopOnly": false
-}
+  }
+  
